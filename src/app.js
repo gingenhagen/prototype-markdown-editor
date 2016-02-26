@@ -96,6 +96,8 @@ class Content extends Component {
 
     // // we then figure out what div we should be in
 
+    this.startKeyboard = performance.now();
+
     // debugger;
     let [line, column] = [undefined, undefined];
     if ($(event.currentTarget).parents().has(this.refs.content.htmlEl)) {
@@ -147,6 +149,12 @@ class Content extends Component {
       sel.removeAllRanges();
       sel.addRange(range);
     }
+
+    if (this.startKeyboard) {
+      console.log(performance.now() - this.startKeyboard);
+      this.startKeyboard = undefined;
+    }
+
   }
 
   render() {
