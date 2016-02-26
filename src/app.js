@@ -74,6 +74,10 @@ const getCaretOffsetWithin = function getCaretOffsetWithin(element) {
   return [0, 0];
 };
 
+const hasParent = function hasParent(element, potentialParent) {
+  return $(element).parents().toArray().filter(el => el === potentialParent).length > 0;
+}
+
 class Content extends Component {
   constructor(props) {
     super(props);
@@ -102,7 +106,7 @@ class Content extends Component {
 
     // debugger;
     let [line, column] = [undefined, undefined];
-    if ($(event.currentTarget).parents().has(this.refs.content.htmlEl)) {
+    if (hasParent(event.currentTarget, this.refs.content.htmlEl)) {
       [line, column] = getCaretOffsetWithin(this.refs.content.htmlEl);
     }
 
@@ -121,20 +125,29 @@ class Content extends Component {
     // this.setState({ lines: lines });
   }
 
+  handleSelectionChange(event) {
+    // console.log('selectionchange: ');
+    // console.log(arguments);
+
+
+    let sel = document.getSelection();
+    if (!hasParent(sel.anchorNode, this.refs.content.htmlEl) && !hasParent(sel.focusNode, this.refs.content.htmlEl)) {
+      // console.log('ignored');
+      return;
+    }
+
+    let [line, column] = getCaretOffsetWithin(this.refs.content.htmlEl);
+
+    this.setState({
+      html: normalizeHTML(this.refs.content.htmlEl.innerText, line),
+      caretLine: line,
+      caretColumn: column
+    });
+  }
+
   componentDidMount() {
     //debugger;
-    $(document).on('selectionchange', () => {
-      // console.log('selectionchange: ');
-      // console.log(arguments);
-
-      let [line, column] = getCaretOffsetWithin(this.refs.content.htmlEl);
-
-      this.setState({
-        html: normalizeHTML(this.refs.content.htmlEl.innerText, line),
-        caretLine: line,
-        caretColumn: column
-      });
-    });
+    $(document).on('selectionchange', (event) => this.handleSelectionChange(event));
   }
 
   shouldComponentUpdate(nextProps, nextState) {
