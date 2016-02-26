@@ -3,19 +3,21 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
+import _ from 'lodash';
 
 import ContentEditable from './react-contenteditable';
 
-const normalizeHTML = function normalizeHTML(html) {
+const normalizeHTML = function normalizeHTML(html, focusLine = 0) {
   let lines = html.split('\n');
   let lastIndex = lines.length - 1;
   return lines.map((currentValue, index) => {
+
+
     if (index === lastIndex && index !== 0 && currentValue === '') {
       return '';
-    } else if (currentValue === '') {
-      return "<div class='line'><br/></div>";
     } else {
-      return `<div class='line'>${currentValue}</div>`;
+      let classes = 'line' + (index === focusLine ? ' focused' : '');
+      return `<div class='${classes}'>${currentValue || '<br/>'}</div>`;
     }
   }).join('');
 };
@@ -105,7 +107,7 @@ class Content extends Component {
     }
 
     this.setState({
-      html: normalizeHTML(event.currentTarget.innerText),
+      html: normalizeHTML(event.currentTarget.innerText, line),
       caretLine: line,
       caretColumn: column
     });
@@ -121,10 +123,22 @@ class Content extends Component {
 
   componentDidMount() {
     //debugger;
-    // $(document).on('selectionchange', function() {
-    //   console.log('selectionchange: ');
-    //   console.log(arguments);
-    // });
+    $(document).on('selectionchange', () => {
+      // console.log('selectionchange: ');
+      // console.log(arguments);
+
+      let [line, column] = getCaretOffsetWithin(this.refs.content.htmlEl);
+
+      this.setState({
+        html: normalizeHTML(this.refs.content.htmlEl.innerText, line),
+        caretLine: line,
+        caretColumn: column
+      });
+    });
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return this.state.html !== nextState.html;
   }
 
   componentDidUpdate(prevProps, prevState) {
