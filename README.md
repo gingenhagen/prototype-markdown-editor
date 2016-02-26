@@ -1,1 +1,1 @@
-# prototype-markdown-editor
+# README
