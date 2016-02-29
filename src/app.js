@@ -50,6 +50,8 @@ const getCaretOffsetWithin = function getCaretOffsetWithin(element) {
 
     let textWithNewLines = element.innerText;
 
+    debugger;
+
     console.assert(textWithNewLines.replace(/\n/g, '').startsWith(offsetString), `"${textWithNewLines.replace(/\n/g, '')}" does not start with "${offsetString}"`);
 
     let textArray = textWithNewLines.split('\n');
@@ -102,16 +104,13 @@ class Content extends Component {
 
     // // we then figure out what div we should be in
 
-    this.startKeyboard = performance.now();
+    // this.startKeyboard = performance.now();
 
     // debugger;
-    let [line, column] = [undefined, undefined];
-    if (hasParent(event.currentTarget, this.refs.content.htmlEl)) {
-      [line, column] = getCaretOffsetWithin(this.refs.content.htmlEl);
-    }
+    let [line, column] = getCaretOffsetWithin(this.refs.content.htmlEl);
 
     this.setState({
-      html: normalizeHTML(event.currentTarget.innerText, line),
+      html: normalizeHTML(this.refs.content.htmlEl.innerText, line),
       caretLine: line,
       caretColumn: column
     });
@@ -164,7 +163,7 @@ class Content extends Component {
 
     //   }
     // }
-    if (this.state.caretLine !== undefined && this.state.caretColumn !== undefined) {
+    // if (this.state.caretLine !== undefined && this.state.caretColumn !== undefined) {
       // debugger;
       // need to get the div that represents the line, which then has a single child that is a text node
       let lineElement = $(this.refs.content.htmlEl).children().get(this.state.caretLine).childNodes[0];
@@ -175,7 +174,7 @@ class Content extends Component {
       let sel = document.getSelection();
       sel.removeAllRanges();
       sel.addRange(range);
-    }
+    // }
 
     if (this.startKeyboard) {
       console.log(performance.now() - this.startKeyboard);
